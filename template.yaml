@@ -1,0 +1,146 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: AI enquiry screener for small accountancy firms
+
+Parameters:
+  SenderEmail:
+    Type: String
+    Description: Email address verified in SES that replies are sent from
+  BedrockModelId:
+    Type: String
+    Default: ""
+    Description: >
+      Bedrock model or inference profile ID for Claude (copy it from the Bedrock
+      console). Leave blank to run with template replies and no AI.
+  AllowedOrigin:
+    Type: String
+    Default: "*"
+    Description: Website allowed to call the API, e.g. https://www.yourfirm.co.uk
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Timeout: 30
+    MemorySize: 256
+    Architectures: [arm64]
+    Environment:
+      Variables:
+        FIRMS_TABLE: !Ref FirmsTable
+        ENQUIRIES_TABLE: !Ref EnquiriesTable
+        SENDER_EMAIL: !Ref SenderEmail
+        BEDROCK_MODEL_ID: !Ref BedrockModelId
+        RETENTION_DAYS: "180"
+
+Resources:
+  FirmsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - {AttributeName: firm_id, AttributeType: S}
+      KeySchema:
+        - {AttributeName: firm_id, KeyType: HASH}
+      SSESpecification: {SSEEnabled: true}
+
+  EnquiriesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - {AttributeName: firm_id, AttributeType: S}
+        - {AttributeName: created, AttributeType: S}
+      KeySchema:
+        - {AttributeName: firm_id, KeyType: HASH}
+        - {AttributeName: created, KeyType: RANGE}
+      TimeToLiveSpecification:
+        AttributeName: expires_at
+        Enabled: true
+      SSESpecification: {SSEEnabled: true}
+
+  EnquiryApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      CorsConfiguration:
+        AllowOrigins: [!Ref AllowedOrigin]
+        AllowMethods: [POST]
+        AllowHeaders: [content-type]
+      DefaultRouteSettings:
+        ThrottlingBurstLimit: 10
+        ThrottlingRateLimit: 5
+
+  SubmitEnquiryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: submit_enquiry.handler
+      Events:
+        Submit:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref EnquiryApi
+            Path: /enquiry
+            Method: POST
+      Policies:
+        - DynamoDBReadPolicy: {TableName: !Ref FirmsTable}
+        - DynamoDBCrudPolicy: {TableName: !Ref EnquiriesTable}
+        - Statement:
+            - Effect: Allow
+              Action: [ses:SendEmail]
+              Resource: "*"
+            - Effect: Allow
+              Action: [bedrock:InvokeModel]
+              Resource: "*"
+
+  ApproveFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: approve.handler
+      Events:
+        ShowDraft:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref EnquiryApi
+            Path: /approve
+            Method: GET
+        SendReply:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref EnquiryApi
+            Path: /approve
+            Method: POST
+      Policies:
+        - DynamoDBReadPolicy: {TableName: !Ref FirmsTable}
+        - DynamoDBCrudPolicy: {TableName: !Ref EnquiriesTable}
+        - Statement:
+            - Effect: Allow
+              Action: [ses:SendEmail]
+              Resource: "*"
+
+  WeeklySummaryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: weekly_summary.handler
+      Events:
+        EveryMonday:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: "cron(0 8 ? * MON *)"
+            ScheduleExpressionTimezone: Europe/London
+      Policies:
+        - DynamoDBReadPolicy: {TableName: !Ref FirmsTable}
+        - DynamoDBReadPolicy: {TableName: !Ref EnquiriesTable}
+        - Statement:
+            - Effect: Allow
+              Action: [ses:SendEmail]
+              Resource: "*"
+
+Outputs:
+  ApiUrl:
+    Description: Paste this into frontend/index.html as API_URL
+    Value: !Sub "https://${EnquiryApi}.execute-api.${AWS::Region}.amazonaws.com/enquiry"
+  FirmsTableName:
+    Value: !Ref FirmsTable
+  EnquiriesTableName:
+    Value: !Ref EnquiriesTable

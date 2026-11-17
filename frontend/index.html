@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Become a client | Chiltern Demo Accountants</title>
+<style>
+  :root { --ink:#1d2433; --muted:#5b6475; --line:#d9dde5; --accent:#1f5f4a; --bg:#f7f6f2; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family: Georgia, "Times New Roman", serif; background:var(--bg); color:var(--ink); }
+  main { max-width:640px; margin:48px auto; padding:0 20px; }
+  h1 { font-weight:normal; font-size:2rem; margin:0 0 8px; }
+  p.lead { color:var(--muted); margin:0 0 32px; font-family: system-ui, sans-serif; }
+  form { font-family: system-ui, sans-serif; background:#fff; border:1px solid var(--line); border-radius:10px; padding:28px; }
+  label { display:block; font-weight:600; font-size:.92rem; margin:18px 0 6px; }
+  .hint { font-weight:normal; color:var(--muted); font-size:.85rem; }
+  input, select, textarea { width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:6px; font:inherit; }
+  textarea { min-height:110px; resize:vertical; }
+  .row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .checks { display:grid; grid-template-columns:1fr 1fr; gap:6px 14px; }
+  .checks label, .consent label { font-weight:normal; margin:0; display:flex; gap:8px; align-items:flex-start; }
+  .checks input, .consent input { width:auto; margin-top:3px; }
+  .consent { margin-top:22px; font-size:.88rem; color:var(--muted); }
+  .hp { position:absolute; left:-9999px; }
+  button { margin-top:24px; width:100%; padding:13px; border:0; border-radius:6px; background:var(--accent); color:#fff; font:600 1rem system-ui, sans-serif; cursor:pointer; }
+  button:disabled { opacity:.6; cursor:wait; }
+  #status { margin-top:16px; font-size:.95rem; }
+  #status.ok { color:var(--accent); } #status.err { color:#a32121; }
+  @media (max-width:520px) { .row, .checks { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Tell us about your business</h1>
+  <p class="lead">Takes two minutes. You will get a reply by email straight away.</p>
+
+  <form id="enquiry">
+    <!-- Which firm this form belongs to. Each client firm gets its own ID. -->
+    <input type="hidden" name="firm_id" value="demo-firm">
+    <!-- Honeypot: hidden from people, often filled in by spam bots. -->
+    <div class="hp"><label>Website <input name="website" tabindex="-1" autocomplete="off"></label></div>
+
+    <div class="row">
+      <div><label for="name">Full name</label><input id="name" name="name" required maxlength="100"></div>
+      <div><label for="email">Email</label><input id="email" name="email" type="email" required maxlength="254"></div>
+    </div>
+    <label for="phone">Phone <span class="hint">(optional)</span></label>
+    <input id="phone" name="phone" maxlength="30">
+
+    <div class="row">
+      <div>
+        <label for="business_type">You are a</label>
+        <select id="business_type" name="business_type" required>
+          <option value="">Choose one</option>
+          <option value="sole_trader">Sole trader</option>
+          <option value="limited_company">Limited company</option>
+          <option value="partnership">Partnership</option>
+          <option value="landlord">Landlord</option>
+          <option value="individual">Individual (personal tax only)</option>
+        </select>
+      </div>
+      <div>
+        <label for="turnover">Yearly turnover (£) <span class="hint">rough is fine</span></label>
+        <input id="turnover" name="turnover" type="number" min="0" step="1000" required>
+      </div>
+    </div>
+
+    <label>What do you need help with?</label>
+    <div class="checks">
+      <label><input type="checkbox" name="services" value="self_assessment"> Self assessment</label>
+      <label><input type="checkbox" name="services" value="annual_accounts"> Year-end accounts</label>
+      <label><input type="checkbox" name="services" value="bookkeeping"> Bookkeeping</label>
+      <label><input type="checkbox" name="services" value="vat_returns"> VAT returns</label>
+      <label><input type="checkbox" name="services" value="payroll"> Payroll</label>
+      <label><input type="checkbox" name="services" value="mtd_quarterly"> Making Tax Digital updates</label>
+      <label><input type="checkbox" name="services" value="advisory"> Business advice</label>
+    </div>
+
+    <div class="row">
+      <div>
+        <label for="software">How do you keep records?</label>
+        <select id="software" name="software" required>
+          <option value="">Choose one</option>
+          <option value="xero">Xero</option>
+          <option value="quickbooks">QuickBooks</option>
+          <option value="freeagent">FreeAgent</option>
+          <option value="sage">Sage</option>
+          <option value="spreadsheets">Spreadsheets</option>
+          <option value="paper">Paper receipts</option>
+          <option value="none">I don't really</option>
+          <option value="other">Something else</option>
+        </select>
+      </div>
+      <div>
+        <label for="records_state">How organised are they?</label>
+        <select id="records_state" name="records_state" required>
+          <option value="">Choose one</option>
+          <option value="organised">Up to date and tidy</option>
+          <option value="mostly">Mostly there</option>
+          <option value="messy">Honestly, a bit of a mess</option>
+        </select>
+      </div>
+    </div>
+
+    <label for="deadline">Any deadline coming up? <span class="hint">(optional)</span></label>
+    <input id="deadline" name="deadline" type="date">
+
+    <label for="message">Anything else we should know? <span class="hint">(optional)</span></label>
+    <textarea id="message" name="message" maxlength="2000"></textarea>
+
+    <div class="consent">
+      <label><input type="checkbox" name="consent" required>
+        I agree to Chiltern Demo Accountants using these details to respond to my enquiry.
+        They are deleted after 6 months if I do not become a client.</label>
+    </div>
+
+    <button type="submit">Send enquiry</button>
+    <div id="status" role="status"></div>
+  </form>
+</main>
+
+<script>
+  // After deploying, paste the ApiUrl output from SAM here.
+  const API_URL = "PASTE_API_URL_HERE";
+
+  const form = document.getElementById("enquiry");
+  const statusEl = document.getElementById("status");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const fd = new FormData(form);
+    const services = fd.getAll("services");
+    if (services.length === 0) {
+      statusEl.className = "err";
+      statusEl.textContent = "Please tick at least one service.";
+      return;
+    }
+
+    const payload = {
+      firm_id: fd.get("firm_id"),
+      website: fd.get("website"),
+      name: fd.get("name"),
+      email: fd.get("email"),
+      phone: fd.get("phone"),
+      business_type: fd.get("business_type"),
+      turnover: Number(fd.get("turnover")),
+      services,
+      software: fd.get("software"),
+      records_state: fd.get("records_state"),
+      deadline: fd.get("deadline") || null,
+      message: fd.get("message"),
+      consent: fd.get("consent") === "on",
+    };
+
+    const button = form.querySelector("button");
+    button.disabled = true;
+    statusEl.className = "";
+    statusEl.textContent = "Sending...";
+
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Something went wrong");
+      statusEl.className = "ok";
+      statusEl.textContent = data.message;
+      form.reset();
+    } catch (err) {
+      statusEl.className = "err";
+      statusEl.textContent = err.message;
+    } finally {
+      button.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>

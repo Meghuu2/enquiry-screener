@@ -1,0 +1,52 @@
+{
+  "firm_id": "demo-firm",
+  "firm_name": "Chiltern Demo Accountants",
+  "partner_email": "REPLACE_WITH_YOUR_EMAIL@example.com",
+  "booking_link": "https://calendly.com/your-demo-link",
+  "referral": {
+    "name": "Example Bookkeeping Ltd",
+    "contact": "hello@example-bookkeeping.co.uk"
+  },
+  "accept_threshold": 60,
+  "review_threshold": 40,
+  "rules": [
+    {"field": "business_type", "op": "eq", "value": "limited_company", "points": 20, "reason": "Limited company (core client type)"},
+    {"field": "business_type", "op": "in", "value": ["sole_trader", "landlord"], "points": 5, "reason": "Sole trader or landlord"},
+    {"field": "business_type", "op": "eq", "value": "individual", "points": -15, "reason": "Personal tax only (low fee)"},
+    {"field": "turnover", "op": "gte", "value": 100000, "points": 15, "reason": "Turnover £100k or more"},
+    {"field": "turnover", "op": "lte", "value": 20000, "points": -10, "reason": "Turnover under £20k"},
+    {"field": "software", "op": "in", "value": ["xero", "quickbooks", "freeagent"], "points": 10, "reason": "Already on cloud software we support"},
+    {"field": "software", "op": "in", "value": ["paper", "none"], "points": -15, "reason": "No digital records (MTD workload)"},
+    {"field": "records_state", "op": "eq", "value": "organised", "points": 10, "reason": "Records are organised"},
+    {"field": "records_state", "op": "eq", "value": "messy", "points": -15, "reason": "Messy records"},
+    {"field": "days_to_deadline", "op": "lte", "value": 21, "points": -20, "reason": "Deadline within 3 weeks"},
+    {"field": "services", "op": "contains_any", "value": ["bookkeeping", "payroll", "advisory"], "points": 10, "reason": "Wants recurring services"}
+  ],
+  "pricing": {
+    "base": {
+      "sole_trader": 450,
+      "landlord": 400,
+      "limited_company": 1200,
+      "partnership": 900,
+      "individual": 250
+    },
+    "services": {
+      "self_assessment": 0,
+      "annual_accounts": 0,
+      "bookkeeping": 900,
+      "vat_returns": 450,
+      "payroll": 360,
+      "mtd_quarterly": 300,
+      "advisory": 600
+    },
+    "turnover_bands": [
+      {"max": 50000, "multiplier": 1.0},
+      {"max": 250000, "multiplier": 1.3},
+      {"max": 1000000, "multiplier": 1.7},
+      {"max": null, "multiplier": 2.2}
+    ],
+    "records_multiplier": {"organised": 1.0, "mostly": 1.15, "messy": 1.4},
+    "rush_surcharge": {"days_under": 30, "amount": 150},
+    "range_pct": 0.15
+  }
+}

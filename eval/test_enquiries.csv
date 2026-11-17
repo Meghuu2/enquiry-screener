@@ -1,0 +1,4 @@
+name,business_type,turnover,services,software,records_state,days_to_deadline,message,expected
+Priya Shah,limited_company,180000,annual_accounts;bookkeeping;vat_returns,xero,organised,,Switching accountants before our year end,accept
+Tom Reed,landlord,45000,self_assessment;mtd_quarterly,spreadsheets,mostly,,Two rental flats in Wycombe,review
+Dan Cole,sole_trader,15000,self_assessment,paper,messy,10,Need my return done asap,decline
