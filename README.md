@@ -10,6 +10,20 @@ The partner also gets a weekly summary.
 Built on AWS: API Gateway, Lambda (Python), DynamoDB, Bedrock (Claude), SES
 and EventBridge Scheduler. Everything is defined in one SAM template.
 
+## Screenshots
+
+**1. A prospect fills in the firm's enquiry form**
+
+![Enquiry form](docs/form.png)
+
+**2. The partner gets the decision, the reasons and a drafted reply.** Here the rules scored a perfect fit, but Claude spotted an HMRC investigation in the message and held it back for review.
+
+![Partner email](docs/partner-email.png)
+
+**3. The partner reviews, edits and approves the reply. Nothing is sent until they press Send.**
+
+![Review page](docs/review-page.png)
+
 ---
 
 ## 1. How it works
